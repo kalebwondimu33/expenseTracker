@@ -278,9 +278,14 @@ function renderHome(summary) {
                   <b>${escapeHtml(item.label)}</b>
                   <small>${prettyDate(item.date)}</small>
                 </div>
-                <b class="${item.kind === 'in' ? 'plus' : 'minus'}">
-                  ${item.kind === 'in' ? '+' : '-'}${money(item.amount, symbol)}
-                </b>
+                <div style="text-align:right">
+                  <b class="${item.kind === 'in' ? 'plus' : 'minus'}">
+                    ${item.kind === 'in' ? '+' : '-'}${money(item.amount, symbol)}
+                  </b>
+                  <div>
+                    <button class="ghost-btn" type="button" data-delete="${item.kind}:${item.id}">Delete</button>
+                  </div>
+                </div>
               </div>
             `,
           )
@@ -355,6 +360,34 @@ function expenseBreakdown(summary, symbol) {
   `
 }
 
+function deletableList(items, kind, symbol) {
+  if (!items.length) {
+    return `<p class="empty">Nothing added yet. Save one above, then you can delete it here.</p>`
+  }
+  return `<div class="list">${[...items]
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id))
+    .map((item) => {
+      const label = kind === 'in' ? item.note || 'Day earning' : item.category || item.note || 'Expense'
+      return `
+        <div class="row">
+          <div>
+            <b>${escapeHtml(label)}</b>
+            <small>${prettyDate(item.date)}</small>
+          </div>
+          <div style="text-align:right">
+            <b class="${kind === 'in' ? 'plus' : 'minus'}">
+              ${kind === 'in' ? '+' : '-'}${money(item.amount, symbol)}
+            </b>
+            <div>
+              <button class="ghost-btn" type="button" data-delete="${kind}:${item.id}">Delete</button>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    .join('')}</div>`
+}
+
 function renderPay(symbol) {
   return `
     <form class="card form" id="pay-form">
@@ -374,6 +407,10 @@ function renderPay(symbol) {
       </label>
       <button class="primary-btn" type="submit">Save day earning</button>
     </form>
+    <section class="card">
+      <h3 class="section-title">Days added</h3>
+      ${deletableList(loadEarnings(), 'in', symbol)}
+    </section>
   `
 }
 
@@ -400,6 +437,10 @@ function renderExpense(symbol) {
       </label>
       <button class="primary-btn" type="submit">Save expense</button>
     </form>
+    <section class="card">
+      <h3 class="section-title">Expenses added</h3>
+      ${deletableList(loadExpenses(), 'out', symbol)}
+    </section>
   `
 }
 
@@ -557,7 +598,7 @@ document.getElementById('view').addEventListener('submit', (event) => {
     addEarning({ date, amount, note })
       .then(() => {
         flash('Day earning saved to MongoDB')
-        setTab('home')
+        render()
       })
       .catch((error) => flash(error.message))
   }
@@ -571,7 +612,7 @@ document.getElementById('view').addEventListener('submit', (event) => {
     })
       .then(() => {
         flash('Expense saved to MongoDB')
-        setTab('home')
+        render()
       })
       .catch((error) => flash(error.message))
   }
