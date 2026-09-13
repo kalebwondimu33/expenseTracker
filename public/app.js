@@ -4,12 +4,10 @@ const KEYS = {
   settings: 'shop-ledger-settings',
 }
 
-const CATEGORIES = ['Parts', 'Tools', 'Fuel', 'Shop rent', 'Supplies', 'Other']
-
 const cache = {
   earnings: [],
   expenses: [],
-  settings: { currency: '$', workDaysPerWeek: 6 },
+  settings: { currency: 'Br', workDaysPerWeek: 6 },
 }
 
 const state = {
@@ -66,10 +64,11 @@ async function refresh() {
   cache.earnings = data.earnings || []
   cache.expenses = data.expenses || []
   cache.settings = {
-    currency: '$',
+    currency: 'Br',
     workDaysPerWeek: 6,
     ...(data.settings || {}),
   }
+  if (cache.settings.currency === '$') cache.settings.currency = 'Br'
 }
 
 async function maybeMigrate() {
@@ -319,7 +318,7 @@ function renderHome(summary) {
       </button>
       <button type="button" data-go="expense">
         Track an expense
-        <small>Parts, fuel, tools, rent</small>
+        <small>What you bought for the shop</small>
       </button>
     </div>
     ${expenseBreakdown(summary, symbol)}
@@ -339,7 +338,7 @@ function expenseBreakdown(summary, symbol) {
   if (rows.length === 0) return ''
   return `
     <section class="card forecast">
-      <h3>Expenses by category</h3>
+      <h3>Things bought</h3>
       <div class="list">
         ${rows
           .map(
@@ -392,14 +391,12 @@ function renderExpense(symbol) {
         <input name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required />
       </label>
       <label class="field">
-        <span>Category</span>
-        <select name="category">
-          ${CATEGORIES.map((item) => `<option value="${item}">${item}</option>`).join('')}
-        </select>
+        <span>Things bought</span>
+        <input name="bought" required placeholder="Brake pads, diesel, sockets..." />
       </label>
       <label class="field">
         <span>Note (optional)</span>
-        <input name="note" placeholder="New sockets, diesel..." />
+        <input name="note" placeholder="Where you bought it, extra detail..." />
       </label>
       <button class="primary-btn" type="submit">Save expense</button>
     </form>
@@ -570,7 +567,7 @@ document.getElementById('view').addEventListener('submit', (event) => {
       date,
       amount,
       note,
-      category: String(data.get('category') || 'Other'),
+      category: String(data.get('bought') || '').trim() || 'Stuff',
     })
       .then(() => {
         flash('Expense saved to MongoDB')
@@ -607,7 +604,7 @@ document.getElementById('settings-form').addEventListener('submit', (event) => {
   event.preventDefault()
   const days = Number(document.getElementById('setting-days').value)
   const settings = {
-    currency: document.getElementById('setting-currency').value.trim() || '$',
+    currency: document.getElementById('setting-currency').value.trim() || 'Br',
     workDaysPerWeek: days >= 5 && days <= 7 ? days : 6,
   }
   api('/api/settings', { method: 'PUT', body: JSON.stringify(settings) })
@@ -689,6 +686,9 @@ async function boot() {
     }
     await refresh()
     await maybeMigrate()
+    if (cache.settings.currency === 'Br') {
+      api('/api/settings', { method: 'PUT', body: JSON.stringify(cache.settings) }).catch(() => {})
+    }
     state.db = 'ready'
     setDbStatus('ok', `MongoDB · ${health.database}`)
     render()

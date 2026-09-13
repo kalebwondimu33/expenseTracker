@@ -115,9 +115,11 @@ def all_data():
         return jsonify({"error": mongo["error"]}), 503
     settings = clean(database.settings.find_one({"id": "default"})) or {
         "id": "default",
-        "currency": "$",
+        "currency": "Br",
         "workDaysPerWeek": 6,
     }
+    if settings.get("currency") == "$":
+        settings["currency"] = "Br"
     return jsonify(
         {
             "earnings": [clean(item) for item in database.earnings.find().sort("date", -1)],
@@ -164,7 +166,7 @@ def create_expense():
             "id": item["id"],
             "date": item["date"],
             "amount": float(item["amount"]),
-            "category": item.get("category") or "Other",
+            "category": item.get("category") or "Stuff",
             "note": item.get("note") or "",
         }
     )
@@ -188,7 +190,7 @@ def save_settings():
     item = request.get_json(silent=True) or {}
     payload = {
         "id": "default",
-        "currency": (item.get("currency") or "$").strip() or "$",
+        "currency": (item.get("currency") or "Br").strip() or "Br",
         "workDaysPerWeek": int(item.get("workDaysPerWeek") or 6),
     }
     database.settings.update_one({"id": "default"}, {"$set": payload}, upsert=True)
@@ -225,7 +227,7 @@ def import_data():
                     "id": item["id"],
                     "date": item["date"],
                     "amount": float(item["amount"]),
-                    "category": item.get("category") or "Other",
+                    "category": item.get("category") or "Stuff",
                     "note": item.get("note") or "",
                 }
                 for item in expenses
@@ -237,7 +239,7 @@ def import_data():
             {
                 "$set": {
                     "id": "default",
-                    "currency": settings.get("currency") or "$",
+                    "currency": settings.get("currency") or "Br",
                     "workDaysPerWeek": int(settings.get("workDaysPerWeek") or 6),
                 }
             },

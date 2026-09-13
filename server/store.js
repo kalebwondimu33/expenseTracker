@@ -23,14 +23,16 @@ async function getData() {
     expenses.find().sort({ date: -1 }).toArray(),
     settings.findOne({ id: "default" }),
   ]);
+  const nextSettings = clean(current) || {
+    id: "default",
+    currency: "Br",
+    workDaysPerWeek: 6,
+  }
+  if (nextSettings.currency === "$") nextSettings.currency = "Br"
   return {
     earnings: pay.map(clean),
     expenses: costs.map(clean),
-    settings: clean(current) || {
-      id: "default",
-      currency: "$",
-      workDaysPerWeek: 6,
-    },
+    settings: nextSettings,
   };
 }
 
@@ -52,7 +54,7 @@ async function createExpense(item) {
     id: item.id,
     date: item.date,
     amount: Number(item.amount),
-    category: item.category || "Other",
+    category: item.category || "Stuff",
     note: item.note || "",
   });
 }
@@ -64,7 +66,7 @@ async function deleteExpense(id) {
 async function saveSettings(item) {
   const payload = {
     id: "default",
-    currency: (item.currency || "$").trim() || "$",
+    currency: (item.currency || "Br").trim() || "Br",
     workDaysPerWeek: Number(item.workDaysPerWeek || 6),
   };
   await collections().settings.updateOne({ id: "default" }, { $set: payload }, { upsert: true });
@@ -91,7 +93,7 @@ async function importData(data) {
         id: item.id,
         date: item.date,
         amount: Number(item.amount),
-        category: item.category || "Other",
+        category: item.category || "Stuff",
         note: item.note || "",
       })),
     );
