@@ -1,8 +1,8 @@
 {
-  "name": "shop-ledger",
+  "name": "beki-ledger",
   "version": "1.0.0",
   "private": true,
-  "description": "Mechanic daily pay and expense tracker",
+  "description": "Beki Ledger — mechanic daily pay and expense tracker",
   "scripts": {
     "start": "node server/index.js"
   },

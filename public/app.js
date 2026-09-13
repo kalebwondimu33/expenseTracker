@@ -245,7 +245,7 @@ function renderHome(summary) {
 
   const forecastBody =
     summary.workDays === 0
-      ? `<p>Your pay changes every day. Enter each day’s take-home, and Shop Ledger will estimate the full month from your average work day.</p>`
+      ? `<p>Your pay changes every day. Enter each day’s take-home, and Beki Ledger will estimate the full month from your average work day.</p>`
       : `
         <p>
           You logged ${summary.workDays} work day${summary.workDays === 1 ? '' : 's'} this month.
@@ -471,7 +471,7 @@ function renderSetup() {
     <section class="card form">
       <h2>Database not connected</h2>
       <p class="hint">
-        Shop Ledger reads MongoDB Atlas from the server. On Netlify, add
+        Beki Ledger reads MongoDB Atlas from the server. On Netlify, add
         <b>MONGODB_URI</b> and <b>MONGODB_DB</b> in Site configuration → Environment variables, then redeploy.
       </p>
       ${state.dbError ? `<div class="toast" style="background:#fdecea;color:#b42318">${escapeHtml(state.dbError)}</div>` : ''}
@@ -636,7 +636,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = 'shop-ledger-backup.json'
+  link.download = 'beki-ledger-backup.json'
   link.click()
   URL.revokeObjectURL(url)
 })
