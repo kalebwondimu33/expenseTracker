@@ -238,11 +238,6 @@ function recentRows(summary) {
 function renderHome(summary) {
   const symbol = summary.settings.currency
   const recent = recentRows(summary)
-  const forecastCopy =
-    summary.workDays > 0
-      ? `On track for about ${money(summary.forecastNet, symbol)} this month`
-      : 'Add a day of pay to see your month forecast'
-
   const forecastBody =
     summary.workDays === 0
       ? `<p>Your pay changes every day. Enter each day’s take-home, and Beki Ledger will estimate the full month from your average work day.</p>`
@@ -300,7 +295,6 @@ function renderHome(summary) {
     <section class="hero-net">
       <span>Net after expenses</span>
       <strong>${money(summary.net, symbol)}</strong>
-      <em>${forecastCopy}</em>
     </section>
     <section class="stats">
       <article class="card stat income">
