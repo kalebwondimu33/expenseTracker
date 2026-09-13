@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1c1916" />
+    <title>Shop Ledger — Daily pay & expenses</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">SL</div>
+          <div>
+            <h1>Shop Ledger</h1>
+            <p>Daily pay, monthly picture</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span id="db-status" class="db-status">Checking cloud...</span>
+          <button class="icon-btn" type="button" data-open-settings>Settings</button>
+        </div>
+      </header>
+
+      <div id="toast" class="toast hidden"></div>
+      <main id="view"></main>
+    </div>
+
+    <nav class="tabs">
+      <button type="button" data-tab="home" class="active">Dashboard</button>
+      <button type="button" data-tab="pay">Add pay</button>
+      <button type="button" data-tab="expense">Expense</button>
+      <button type="button" data-tab="history">History</button>
+    </nav>
+
+    <div id="settings-modal" class="modal-backdrop hidden">
+      <form class="card modal form" id="settings-form">
+        <h2>Settings</h2>
+        <label class="field">
+          <span>Currency symbol</span>
+          <input id="setting-currency" maxlength="3" />
+        </label>
+        <label class="field">
+          <span>Work days per week</span>
+          <select id="setting-days">
+            <option value="5">5 — weekdays</option>
+            <option value="6">6 — weekdays + Saturday</option>
+            <option value="7">7 — every day</option>
+          </select>
+        </label>
+        <div class="actions">
+          <button class="ghost-btn" type="button" id="export-btn">Export backup</button>
+          <label class="ghost-btn">
+            Import
+            <input id="import-file" type="file" accept="application/json" hidden />
+          </label>
+        </div>
+        <div class="actions">
+          <button class="ghost-btn" type="button" data-close-settings>Cancel</button>
+          <button class="primary-btn" type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
