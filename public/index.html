@@ -70,6 +70,17 @@
       </form>
     </div>
 
+    <div id="confirm-modal" class="modal-backdrop hidden">
+      <div class="card modal form" id="confirm-dialog">
+        <h2>Delete this entry?</h2>
+        <p class="hint" id="confirm-text">This cannot be undone.</p>
+        <div class="actions">
+          <button class="ghost-btn" type="button" id="confirm-cancel">Cancel</button>
+          <button class="danger-btn" type="button" id="confirm-ok">Yes, delete</button>
+        </div>
+      </div>
+    </div>
+
     <script src="app.js"></script>
   </body>
 </html>

@@ -543,6 +543,30 @@ async function addExpense(item) {
   cache.expenses = [record, ...cache.expenses]
 }
 
+let pendingDelete = null
+
+function findEntry(kind, id) {
+  const list = kind === 'in' ? loadEarnings() : loadExpenses()
+  return list.find((item) => item.id === id)
+}
+
+function askDelete(kind, id) {
+  const item = findEntry(kind, id)
+  if (!item) return
+  pendingDelete = { kind, id }
+  const symbol = loadSettings().currency
+  const label = kind === 'in' ? item.note || 'Day earning' : item.category || item.note || 'Expense'
+  const what = kind === 'in' ? 'pay day' : 'expense'
+  document.getElementById('confirm-text').textContent =
+    `Delete this ${what}: ${label} · ${prettyDate(item.date)} · ${money(item.amount, symbol)}? This cannot be undone.`
+  document.getElementById('confirm-modal').classList.remove('hidden')
+}
+
+function closeConfirm() {
+  pendingDelete = null
+  document.getElementById('confirm-modal').classList.add('hidden')
+}
+
 async function removeItem(kind, id) {
   try {
     if (kind === 'in') {
@@ -575,7 +599,7 @@ document.getElementById('view').addEventListener('click', (event) => {
   const del = event.target.closest('[data-delete]')
   if (del) {
     const [kind, id] = del.dataset.delete.split(':')
-    removeItem(kind, id)
+    askDelete(kind, id)
   }
 })
 
@@ -633,6 +657,17 @@ document.querySelector('[data-open-settings]').addEventListener('click', openSet
 document.querySelector('[data-close-settings]').addEventListener('click', closeSettings)
 settingsModal.addEventListener('click', (event) => {
   if (event.target === settingsModal) closeSettings()
+})
+
+const confirmModal = document.getElementById('confirm-modal')
+document.getElementById('confirm-cancel').addEventListener('click', closeConfirm)
+document.getElementById('confirm-ok').addEventListener('click', () => {
+  const pending = pendingDelete
+  closeConfirm()
+  if (pending) removeItem(pending.kind, pending.id)
+})
+confirmModal.addEventListener('click', (event) => {
+  if (event.target === confirmModal) closeConfirm()
 })
 
 document.getElementById('settings-form').addEventListener('submit', (event) => {
