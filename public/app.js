@@ -355,10 +355,58 @@ function renderHome(summary) {
         <small>What you bought for the shop</small>
       </button>
     </div>
+    ${biggestSpend(summary, symbol)}
     ${expenseBreakdown(summary, symbol)}
     <section class="card">
       <h3 class="section-title">Recent this month</h3>
       ${recentBody}
+    </section>
+  `
+}
+
+function spendRanks(summary) {
+  const groups = new Map()
+  summary.monthExpenses.forEach((item) => {
+    const name = (item.category || item.note || 'Expense').trim()
+    const key = name.toLowerCase()
+    const current = groups.get(key) || { name, amount: 0, count: 0 }
+    current.amount += item.amount
+    current.count += 1
+    if (name.length > current.name.length) current.name = name
+    groups.set(key, current)
+  })
+  return [...groups.values()].sort((a, b) => b.amount - a.amount)
+}
+
+function biggestSpend(summary, symbol) {
+  const ranks = spendRanks(summary)
+  if (ranks.length === 0) return ''
+  const top = ranks[0]
+  const share = summary.spent > 0 ? Math.round((top.amount / summary.spent) * 100) : 0
+  return `
+    <section class="card biggest-spend">
+      <h3>Biggest spend this month</h3>
+      <p class="hint">This shows which buy took the most money, after adding the same kind of purchase together.</p>
+      <div class="biggest-spend-hero">
+        <span>You spent the most on</span>
+        <strong>${escapeHtml(top.name)}</strong>
+        <em>${money(top.amount, symbol)} · ${share}% of expenses · ${top.count} time${top.count === 1 ? '' : 's'}</em>
+      </div>
+      <div class="list">
+        ${ranks
+          .map(
+            (item, index) => `
+              <div class="row">
+                <div>
+                  <b>${index + 1}. ${escapeHtml(item.name)}</b>
+                  <small>${item.count} buy${item.count === 1 ? '' : 's'}</small>
+                </div>
+                <b class="minus">${money(item.amount, symbol)}</b>
+              </div>
+            `,
+          )
+          .join('')}
+      </div>
     </section>
   `
 }

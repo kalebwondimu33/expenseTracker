@@ -311,6 +311,42 @@ button {
   grid-template-columns: 1fr;
 }
 
+.biggest-spend {
+  margin-bottom: 14px;
+}
+
+.biggest-spend h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.biggest-spend-hero {
+  background: #fdecea;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 12px 0 8px;
+}
+
+.biggest-spend-hero span {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+.biggest-spend-hero strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+}
+
+.biggest-spend-hero em {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  color: var(--red);
+  font-weight: 600;
+}
+
 .quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
