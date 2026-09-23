@@ -166,11 +166,17 @@ function summarize() {
   const earned = monthEarnings.reduce((sum, item) => sum + item.amount, 0)
   const spent = monthExpenses.reduce((sum, item) => sum + item.amount, 0)
   const workDays = new Set(monthEarnings.map((item) => item.date)).size
+  const spendDays = new Set(monthExpenses.map((item) => item.date)).size
   const avgPerWorkDay = workDays > 0 ? earned / workDays : 0
+  const avgExpensePerDay = spendDays > 0 ? spent / spendDays : 0
   const expectedWorkDays = weekdayCount(state.year, state.month, settings.workDaysPerWeek)
   const forecast = avgPerWorkDay * expectedWorkDays
+  const expenseForecast = avgExpensePerDay * expectedWorkDays
   const allDays = new Set(earnings.map((item) => item.date)).size
   const lifetimeAvg = allDays > 0 ? earnings.reduce((sum, item) => sum + item.amount, 0) / allDays : 0
+  const allSpendDays = new Set(expenses.map((item) => item.date)).size
+  const lifetimeExpenseAvg =
+    allSpendDays > 0 ? expenses.reduce((sum, item) => sum + item.amount, 0) / allSpendDays : 0
 
   return {
     settings,
@@ -180,11 +186,15 @@ function summarize() {
     spent,
     net: earned - spent,
     workDays,
+    spendDays,
     avgPerWorkDay,
+    avgExpensePerDay,
     expectedWorkDays,
     forecast,
-    forecastNet: forecast - spent,
+    expenseForecast,
+    forecastNet: forecast - expenseForecast,
     lifetimeAvg,
+    lifetimeExpenseAvg,
   }
 }
 
@@ -238,9 +248,9 @@ function recentRows(summary) {
 function renderHome(summary) {
   const symbol = summary.settings.currency
   const recent = recentRows(summary)
-  const forecastBody =
+  const payForecast =
     summary.workDays === 0
-      ? `<p>Your pay changes every day. Enter each day’s take-home, and Beki Ledger will estimate the full month from your average work day.</p>`
+      ? `<p>Enter each day’s take-home to estimate pay for the full month.</p>`
       : `
         <p>
           You logged ${summary.workDays} work day${summary.workDays === 1 ? '' : 's'} this month.
@@ -252,15 +262,53 @@ function renderHome(summary) {
             <b>${money(summary.avgPerWorkDay, symbol)}</b>
           </div>
           <div>
-            <span>Month forecast (${summary.expectedWorkDays} work days)</span>
+            <span>Pay forecast (${summary.expectedWorkDays} work days)</span>
             <b>${money(summary.forecast, symbol)}</b>
           </div>
         </div>
-        <p class="hint">
-          Forecast = average work-day pay × ${summary.settings.workDaysPerWeek} work days a week
-          ${summary.lifetimeAvg > 0 ? ` · All-time daily average ${money(summary.lifetimeAvg, symbol)}` : ''}.
-        </p>
       `
+
+  const expenseForecast =
+    summary.spendDays === 0
+      ? `<p>Enter what you buy to estimate expenses for the full month.</p>`
+      : `
+        <p>
+          You logged spending on ${summary.spendDays} day${summary.spendDays === 1 ? '' : 's'} this month.
+          Average spend on those days is <b>${money(summary.avgExpensePerDay, symbol)}</b>.
+        </p>
+        <div class="forecast-grid spend">
+          <div>
+            <span>Average expense per day</span>
+            <b>${money(summary.avgExpensePerDay, symbol)}</b>
+          </div>
+          <div>
+            <span>Expense forecast (${summary.expectedWorkDays} work days)</span>
+            <b>${money(summary.expenseForecast, symbol)}</b>
+          </div>
+        </div>
+      `
+
+  const forecastBody = `
+    <h4>Pay</h4>
+    ${payForecast}
+    <h4>Expenses</h4>
+    ${expenseForecast}
+    ${
+      summary.workDays > 0 || summary.spendDays > 0
+        ? `<div class="forecast-grid net">
+            <div>
+              <span>Forecast net after expenses</span>
+              <b>${money(summary.forecastNet, symbol)}</b>
+            </div>
+          </div>
+          <p class="hint">
+            Forecast = daily average × ${summary.settings.workDaysPerWeek} work days a week
+            ${summary.lifetimeAvg > 0 ? ` · All-time pay average ${money(summary.lifetimeAvg, symbol)}` : ''}
+            ${summary.lifetimeExpenseAvg > 0 ? ` · All-time expense average ${money(summary.lifetimeExpenseAvg, symbol)}` : ''}.
+          </p>`
+        : ''
+    }
+  `
 
   const recentBody =
     recent.length === 0

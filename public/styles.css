@@ -290,6 +290,27 @@ button {
   font-size: 1.15rem;
 }
 
+.forecast h4 {
+  margin: 16px 0 8px;
+  font-size: 0.92rem;
+}
+
+.forecast h4:first-of-type {
+  margin-top: 0;
+}
+
+.forecast-grid.spend div {
+  background: #fdecea;
+}
+
+.forecast-grid.spend b {
+  color: var(--red);
+}
+
+.forecast-grid.net {
+  grid-template-columns: 1fr;
+}
+
 .quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
