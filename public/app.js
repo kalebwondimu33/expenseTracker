@@ -130,20 +130,7 @@ function money(amount, symbol) {
   return amount < 0 ? `-${symbol}${formatted}` : `${symbol}${formatted}`
 }
 
-function weekdayCount(year, month, workDaysPerWeek) {
-  const total = daysInMonth(year, month)
-  const workSet =
-    workDaysPerWeek >= 7
-      ? new Set([0, 1, 2, 3, 4, 5, 6])
-      : workDaysPerWeek === 6
-        ? new Set([1, 2, 3, 4, 5, 6])
-        : new Set([1, 2, 3, 4, 5])
-  let count = 0
-  for (let day = 1; day <= total; day += 1) {
-    if (workSet.has(new Date(year, month, day).getDay())) count += 1
-  }
-  return count
-}
+const FORECAST_DAYS = 30
 
 function newId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -169,9 +156,9 @@ function summarize() {
   const spendDays = new Set(monthExpenses.map((item) => item.date)).size
   const avgPerWorkDay = workDays > 0 ? earned / workDays : 0
   const avgExpensePerDay = spendDays > 0 ? spent / spendDays : 0
-  const expectedWorkDays = weekdayCount(state.year, state.month, settings.workDaysPerWeek)
-  const forecast = avgPerWorkDay * expectedWorkDays
-  const expenseForecast = avgExpensePerDay * expectedWorkDays
+  const expectedWorkDays = FORECAST_DAYS
+  const forecast = avgPerWorkDay * FORECAST_DAYS
+  const expenseForecast = avgExpensePerDay * FORECAST_DAYS
   const allDays = new Set(earnings.map((item) => item.date)).size
   const lifetimeAvg = allDays > 0 ? earnings.reduce((sum, item) => sum + item.amount, 0) / allDays : 0
   const allSpendDays = new Set(expenses.map((item) => item.date)).size
@@ -262,7 +249,7 @@ function renderHome(summary) {
             <b>${money(summary.avgPerWorkDay, symbol)}</b>
           </div>
           <div>
-            <span>Pay forecast (${summary.expectedWorkDays} work days)</span>
+            <span>Pay forecast (30 days)</span>
             <b>${money(summary.forecast, symbol)}</b>
           </div>
         </div>
@@ -282,7 +269,7 @@ function renderHome(summary) {
             <b>${money(summary.avgExpensePerDay, symbol)}</b>
           </div>
           <div>
-            <span>Expense forecast (${summary.expectedWorkDays} work days)</span>
+            <span>Expense forecast (30 days)</span>
             <b>${money(summary.expenseForecast, symbol)}</b>
           </div>
         </div>
@@ -302,7 +289,7 @@ function renderHome(summary) {
             </div>
           </div>
           <p class="hint">
-            Forecast = daily average × ${summary.settings.workDaysPerWeek} work days a week
+            Forecast = daily average × 30 days
             ${summary.lifetimeAvg > 0 ? ` · All-time pay average ${money(summary.lifetimeAvg, symbol)}` : ''}
             ${summary.lifetimeExpenseAvg > 0 ? ` · All-time expense average ${money(summary.lifetimeExpenseAvg, symbol)}` : ''}.
           </p>`
