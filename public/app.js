@@ -223,7 +223,7 @@ function recentRows(summary) {
     ...summary.monthExpenses.map((item) => ({
       id: item.id,
       date: item.date,
-      label: item.note || item.category,
+      label: item.category || item.note || 'Expense',
       amount: item.amount,
       kind: 'out',
     })),
@@ -364,11 +364,7 @@ function renderHome(summary) {
 }
 
 function expenseBreakdown(summary, symbol) {
-  const groups = {}
-  summary.monthExpenses.forEach((item) => {
-    groups[item.category] = (groups[item.category] || 0) + item.amount
-  })
-  const rows = Object.entries(groups).sort((a, b) => b[1] - a[1])
+  const rows = [...summary.monthExpenses].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id))
   if (rows.length === 0) return ''
   return `
     <section class="card forecast">
@@ -376,10 +372,18 @@ function expenseBreakdown(summary, symbol) {
       <div class="list">
         ${rows
           .map(
-            ([name, amount]) => `
+            (item) => `
               <div class="row">
-                <b>${escapeHtml(name)}</b>
-                <b class="minus">${money(amount, symbol)}</b>
+                <div>
+                  <b>${escapeHtml(item.category || item.note || 'Expense')}</b>
+                  <small>${prettyDate(item.date)}</small>
+                </div>
+                <div style="text-align:right">
+                  <b class="minus">${money(item.amount, symbol)}</b>
+                  <div>
+                    <button class="ghost-btn" type="button" data-delete="out:${item.id}">Delete</button>
+                  </div>
+                </div>
               </div>
             `,
           )
